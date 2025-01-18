@@ -4,7 +4,7 @@
 
 ## Overview
 
-This script is designed to indefinitely stream audio content, including weather updates, time announcements, and Lovecraftian stories. It uses text-to-speech synthesis to convert text into audio and plays it along with background music.
+This script is designed to indefinitely stream audio content, including weather updates, time announcements, and Lovecraftian stories. It uses text-to-speech synthesis to convert text into audio and plays it along with background music. This project makes use of [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx).
 
 ## Features
 
