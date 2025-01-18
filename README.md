@@ -14,6 +14,11 @@ This script is designed to indefinitely stream audio content, including weather 
 - Background music playback.
 - User input handling for dynamic TTS injection between generated text.
 
+## Sample
+
+[sample.webm](https://github.com/user-attachments/assets/b797ef04-2eaf-4107-87a1-36d66a1d04d3)
+
+
 ## Requirements
 
 To run this script, you need to have the following Python packages installed:
