@@ -249,7 +249,7 @@ async def buffered_audio_consumer(queue, kokoro):
                     channels=1
                 )
                 # Make the audio 2 channels with a slight delay to create a stereo effect
-                stereo_audio = AudioSegment.from_mono_audiosegments(AudioSegment.silent(duration=25) + audio , audio + AudioSegment.silent(duration=25))
+                stereo_audio = AudioSegment.from_mono_audiosegments(AudioSegment.silent(duration=10) + audio , audio + AudioSegment.silent(duration=10))
                 # Add a 1-second silence at the end of the paragraph
                 stereo_audio = stereo_audio + AudioSegment.silent(duration=1000)                
                 # Add the audio to the buffer queue
