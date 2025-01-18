@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual Environment
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Other
+.DS_Store
+kokoro-v0_19.onnx
+voices.json
+audio/am-radio-static-60183.mp3
