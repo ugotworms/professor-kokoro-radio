@@ -16,7 +16,7 @@ This script is designed to indefinitely stream audio content, including weather 
 
 ## Sample
 
-[sample.webm](https://github.com/user-attachments/assets/b797ef04-2eaf-4107-87a1-36d66a1d04d3)
+[sample (2).webm](https://github.com/user-attachments/assets/01e2f740-e426-4a69-a9d1-55a34e62a701)
 
 
 ## Requirements
