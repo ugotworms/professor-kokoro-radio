@@ -164,10 +164,15 @@ def get_time():
     else:
         time_of_day = "evening"
 
-    return f"Good {time_of_day}, the time is now {time_text}."
+    return (time_of_day, time_text)
+
+
 
 # Produce time and weather updates and add them to the queue
 async def time_weather_producer(queue,station):
+    with open('headlines.json', 'r') as file:
+        headlines = json.load(file)
+
     while True:
         if(datetime.now().minute==0): #on the hour, play a bell sound for each hour
             bell = AudioSegment.from_file("audio/single-church-bell-156463.mp3")
@@ -178,11 +183,20 @@ async def time_weather_producer(queue,station):
                 await asyncio.sleep(1.7) #allows for playing to overlap slightly
                 threading.Thread(target=play, args=(bell,)).start()               
         
-        time_text = get_time()
-        await queue.put(time_text)   
+        time_of_day,time_text = get_time()
+        await queue.put(f"Good {time_of_day}, the time is now {time_text}.")   
         weather_text = await get_weather(station)        
         await queue.put(weather_text)
-        await asyncio.sleep(60)  # Delay 60 seconds between updates
+
+        #20% chance to run different logic:
+        if(np.random.randint(1,6) == 5):
+            headline = headlines[np.random.randint(0, len(headlines))]
+            print(f"[headline]: {headline["headline"]}")
+            await asyncio.sleep(20)
+            await queue.put(f"Thank you for tuning in, my name is Professor Kokoro. Today is {headline["date"]}. {headline["headline"]} The time is now {time_text}")
+            await asyncio.sleep(60)
+        else:
+            await asyncio.sleep(60)  # Delay 60 seconds between updates
 
 # Produce story lines and add them to the queue
 async def story_producer(queue):
@@ -265,19 +279,22 @@ async def buffered_audio_consumer(queue, kokoro):
             stream = kokoro.create_stream(text, voice=bm_lewis, speed=speed, lang="en-us")
             async for samples, sample_rate in stream:
                 # Convert samples to AudioSegment
+                #convert from float32 to int16 for pydub to work with:
+                int16_data = (samples * 32767).astype(np.int16)
                 audio = AudioSegment(
-                    samples.tobytes(),
+                    int16_data.tobytes(),
                     frame_rate=sample_rate,
-                    sample_width=samples.dtype.itemsize,
+                    sample_width=2, #2 bytes per sample (int16)
                     channels=1
                 )
-                # Make the audio 2 channels with a slight delay to create a stereo effect
-                stereo_audio = AudioSegment.from_mono_audiosegments(AudioSegment.silent(duration=10) + audio , audio + AudioSegment.silent(duration=10))
-                # Add a 1-second silence at the end of the paragraph
-                stereo_audio = stereo_audio + AudioSegment.silent(duration=1000)      
                 
-                #issue: reducing volume corrupts the audio, may be related to https://github.com/jiaaro/pydub/pull/781/commits                
-                #stereo_audio = stereo_audio - 2                
+                # Make the mono audio 2 channels with a slight delay to create a stereo widen effect
+                stereo_audio = AudioSegment.from_mono_audiosegments(AudioSegment.silent(duration=10) + audio , audio + AudioSegment.silent(duration=10))                 
+              
+                # Add a 1-second silence at the end of the paragraph
+                stereo_audio = stereo_audio + AudioSegment.silent(duration=1000)   
+                                     
+                stereo_audio = stereo_audio - 5 #lower volume on voice (aligns with the bg music)               
                 
                 # Add the audio to the buffer queue
                 buffer_queue.put(stereo_audio)
