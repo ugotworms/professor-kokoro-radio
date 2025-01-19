@@ -65,6 +65,7 @@ def correct_pronuncation(text):
     text = text.replace("Nyarlathotep", "nye-are-lath-oh-tep")    
     text = text.replace("Yog-Sothoth", "yog-so-thoth")
     text = text.replace("Pnakotic", "nuh-kah-tick")
+    text = text.replace("--", ", ")
     return text
 
 # Play background music tracks in an infinite loop
@@ -187,7 +188,7 @@ async def time_weather_producer(queue,station):
 async def story_producer(queue):
     config = load_config()
     corpus_lines = load_corpus_lines(config["story"])
-
+    char_counter = 0
     while True:
         # If the queue has 2+ items, wait until it's processed to avoid advancing the config line too quickly
         if queue.qsize() > 2:
@@ -199,6 +200,11 @@ async def story_producer(queue):
             await queue.put(line)
             config["line"] += 1
             save_config(config)
+            char_counter += len(line)
+            if char_counter > 1000:
+                await asyncio.sleep(2.0)
+                await queue.put("::PAGETURN::")
+                char_counter = 0
         else:         
             await asyncio.sleep(2.0)
             await queue.put(f"Thank you for listening to {config['title']} by {config['author']}. We will now begin a new story.")
@@ -247,10 +253,16 @@ async def buffered_audio_consumer(queue, kokoro):
                 await asyncio.sleep(0.5)
                 continue
             text = await queue.get()
+            if(text=="::PAGETURN::"):
+                buffer_queue.put(AudioSegment.from_file(f"audio/pageturn0{random.randint(1, 4)}.wav"))                
+                continue
             print(text)
             #randomize speed between 0.8 and 1.0 for a more natural sound
             speed = random.uniform(0.8, 1.0)
-            stream = kokoro.create_stream(text, voice="bm_lewis", speed=speed, lang="en-us")
+            bm_lewis:np.ndarray = kokoro.get_voice_style("bm_lewis")   
+            #am_michael:np.ndarray = kokoro.get_voice_style("am_michael")   
+            #blend = np.add(bm_lewis * (80 / 100), am_michael * (20 / 100))           
+            stream = kokoro.create_stream(text, voice=bm_lewis, speed=speed, lang="en-us")
             async for samples, sample_rate in stream:
                 # Convert samples to AudioSegment
                 audio = AudioSegment(
@@ -290,6 +302,7 @@ async def main(mode="time_weather"):
             opening_line = f"We now begin the tale '{config['title']}' by {config['author']}."
 
         await queue.put(opening_line)
+        await queue.put("::PAGETURN::")
         producer_task = asyncio.create_task(story_producer(queue))
     else:
         producer_task = asyncio.create_task(time_weather_producer(queue,"FOXR1")) # Providence, RI where Lovecraft lived
