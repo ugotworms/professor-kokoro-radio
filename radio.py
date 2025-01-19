@@ -57,7 +57,7 @@ def load_corpus_lines(story_file):
 
 # Correct pronunciation of specific Lovecraftian words
 def correct_pronuncation(text):
-    text = text.replace("Miskatonic", "miss-huk-tonic")
+    text = text.replace("Miskatonic", "miss-kuh-tonic")
     text = text.replace("Arkham", "ark-hum")
     text = text.replace("Cthulhu", "kuh-thoo-loo")
     text = text.replace("Necronomicon", "neck-row-nom-ih-con")
@@ -168,6 +168,15 @@ def get_time():
 # Produce time and weather updates and add them to the queue
 async def time_weather_producer(queue,station):
     while True:
+        if(datetime.now().minute==0): #on the hour, play a bell sound for each hour
+            bell = AudioSegment.from_file("audio/single-church-bell-156463.mp3")
+            hour = datetime.now().hour
+            if hour > 12:
+                hour = hour - 12
+            for i in range(hour):
+                await asyncio.sleep(1.7) #allows for playing to overlap slightly
+                threading.Thread(target=play, args=(bell,)).start()               
+        
         time_text = get_time()
         await queue.put(time_text)   
         weather_text = await get_weather(station)        
@@ -239,7 +248,9 @@ async def buffered_audio_consumer(queue, kokoro):
                 continue
             text = await queue.get()
             print(text)
-            stream = kokoro.create_stream(text, voice="bm_lewis", speed=0.8, lang="en-us")
+            #randomize speed between 0.8 and 1.0 for a more natural sound
+            speed = random.uniform(0.8, 1.0)
+            stream = kokoro.create_stream(text, voice="bm_lewis", speed=speed, lang="en-us")
             async for samples, sample_rate in stream:
                 # Convert samples to AudioSegment
                 audio = AudioSegment(
@@ -251,7 +262,11 @@ async def buffered_audio_consumer(queue, kokoro):
                 # Make the audio 2 channels with a slight delay to create a stereo effect
                 stereo_audio = AudioSegment.from_mono_audiosegments(AudioSegment.silent(duration=10) + audio , audio + AudioSegment.silent(duration=10))
                 # Add a 1-second silence at the end of the paragraph
-                stereo_audio = stereo_audio + AudioSegment.silent(duration=1000)                
+                stereo_audio = stereo_audio + AudioSegment.silent(duration=1000)      
+                
+                #issue: reducing volume corrupts the audio, may be related to https://github.com/jiaaro/pydub/pull/781/commits                
+                #stereo_audio = stereo_audio - 2                
+                
                 # Add the audio to the buffer queue
                 buffer_queue.put(stereo_audio)
 
