@@ -59,12 +59,12 @@ def load_corpus_lines(story_file):
 def correct_pronuncation(text):
     text = text.replace("Miskatonic", "miss-kuh-tonic")
     text = text.replace("Arkham", "ark-hum")
-    text = text.replace("Cthulhu", "kuh-thoo-loo")
-    text = text.replace("Necronomicon", "neck-row-nom-ih-con")
+    text = text.replace("Cthulhu", "kuh-thewloo")
+    #text = text.replace("Necronomicon", "neck-row-nom-ih-con")
     text = text.replace("R'lyeh", "rill-ee-uh")
     text = text.replace("Nyarlathotep", "nye-are-lath-oh-tep")    
     text = text.replace("Yog-Sothoth", "yog-so-thoth")
-    text = text.replace("Pnakotic", "nak-oh-tick")
+    text = text.replace("Pnakotic", "nuh-kah-tick")
     return text
 
 # Play background music tracks in an infinite loop
