@@ -29,6 +29,13 @@ To run this script, you need to have the following Python packages installed:
 pip install -requirements.txt
 ```
 
+If you get an error installing PyAudio which indicates that you need to install a library that provides "portaudio.h" for `pyaudio@0.2.14`, 
+make sure you have `portaudio19-dev` installed (for Ubuntu/Debian)
+
+```
+sudo apt-get install portaudio19-dev
+```
+
 ## Installation
 
 1. Clone the repository or download the script.
