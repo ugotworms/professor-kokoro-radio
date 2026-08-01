@@ -50,7 +50,7 @@ To run the script, use the following command:
 python radio.py --mode <mode>
 ```
 
-Replace `<mode>` with either `time_weather` or `story` depending on the desired functionality.
+Replace `<mode>` with either `time_weather` or `story` depending on the desired functionality. The main `radio.py` script now initializes the `Radio` class from the `radio` package and runs the application.
 
 ### Example
 
@@ -60,11 +60,21 @@ To run the script in `time_weather` mode:
 python radio.py --mode time_weather
 ```
 
-To run the script in `story` mode:
+To run the a script in `story` mode:
 
 ```bash
 python radio.py --mode story
 ```
+
+## Module Structure
+
+The project has been refactored into a modular package structure to improve maintainability and testability. The core logic is now organized into the following modules:
+
+*   **`radio/config.py`**: Handles loading and saving the configuration from `radio_config.json`.
+*   **`radio/weather.py`**: Fetches and formats weather data from the weather.gov API.
+*   **`radio/story.py`**: Manages the selection and processing of stories from the corpus.
+*   **`radio/audio.py`**: Handles audio playback, including background music and text-to-speech synthesis.
+*   **`radio/radio.py`**: Contains the main `Radio` class that orchestrates the entire application.
 
 ## Configuration
 
